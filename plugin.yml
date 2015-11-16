@@ -1,0 +1,14 @@
+name: PlayerInfo
+main: pi.pixel.dev.Main
+version: 1.0
+author: Pixeled_
+description: Checks a player for info.
+commands:
+  info:
+    usage: /<command> [player]
+    description: Checks a player for info.
+    permission: info.check
+permissions:
+    info.check:
+        description: Checks a player for info.
+        default: op
