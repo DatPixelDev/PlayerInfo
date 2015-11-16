@@ -1,0 +1,92 @@
+package pi.pixel.dev;
+
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.permission.Permission;
+
+public class Main extends JavaPlugin {
+
+	@Override
+	public void onEnable(){
+		if(!setupPermissions()){
+			getLogger().severe(" Plugin requires VAULT to be enabled.");
+			Bukkit.getPluginManager().disablePlugin(this);
+		}
+		else if(!setupEconomy()){
+			getLogger().severe(" Plugin requires VAULT to be enabled.");
+			Bukkit.getPluginManager().disablePlugin(this);
+		}
+	}
+	@Override
+	public void onDisable(){
+	}
+	public static Economy economy = null;
+	private boolean setupEconomy()
+    {
+        RegisteredServiceProvider<Economy> economyProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            economy = economyProvider.getProvider();
+        }
+
+        return (economy != null);
+    }
+	public static Permission permission = null;
+    private boolean setupPermissions()
+    {
+        RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(net.milkbowl.vault.permission.Permission.class);
+        if (permissionProvider != null) {
+            permission = permissionProvider.getProvider();
+        }
+        return (permission != null);
+    }
+	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		if (sender instanceof Player) {
+			Player p = (Player) sender;
+			long health = Math.round(p.getHealth());
+			if (cmd.getName().equalsIgnoreCase("info")) {
+				if (p.hasPermission("info.check")) {
+					if (args.length == 0) {
+						p.sendMessage("§a§lYour Info:");
+						p.sendMessage("§d ");
+    					p.sendMessage("§eRank §f" + permission.getPrimaryGroup(p.getPlayer()));
+    					p.sendMessage("§eBalance §f" + economy.getBalance(p.getPlayer()));
+    					p.sendMessage("§eEXP §f" + p.getExp());
+    					p.sendMessage("§eFood §f" + p.getFoodLevel());
+    					p.sendMessage("§eHealth §f" + String.valueOf(health));
+    					p.sendMessage("§eIP §f" + p.getAddress());
+						return true;
+					} else if (args.length == 1) {
+						Player t = Bukkit.getServer().getPlayer(args[0]);
+						if (t == null) {
+							p.sendMessage("§aInfo> §cPlayer not found.");
+							return true;
+						} else {
+							p.sendMessage("§a" + t.getName() + "§a's Info:");
+	    					p.sendMessage("§d ");
+	    					p.sendMessage("§eRank §f" + permission.getPrimaryGroup(t.getPlayer()));
+	    					p.sendMessage("§eBalance §f" + economy.getBalance(t.getPlayer()));
+	    					p.sendMessage("§eEXP §f" + t.getExp());
+	    					p.sendMessage("§eFood §f" + t.getFoodLevel());
+	    					p.sendMessage("§eHealth §f" + String.valueOf(health));
+	    					p.sendMessage("§eIP §f" + t.getAddress());
+							return true;
+						}
+					} else {
+						p.sendMessage("§aInfo> §cToo many arguments.");
+						return true;
+					}
+				}
+			}
+		} else {
+			sender.sendMessage("§cYou must be a player to execute this.");
+			return false;
+		}
+		return false;
+	}
+}
